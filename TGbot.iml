@@ -9,8 +9,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.8.0" level="project" />
-    <orderEntry type="library" name="com.github.pengrad:java-telegram-bot-api:4.1.1" level="project" />
     <orderEntry type="library" name="telegrambots-4.1-jar-with-dependencies" level="project" />
     <orderEntry type="library" name="it.rebase:rebot-telegram-api-emojis:0.3" level="project" />
+    <orderEntry type="library" name="mysql-connector-java-8.0.15" level="project" />
   </component>
 </module>
