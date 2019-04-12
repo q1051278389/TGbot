@@ -9,13 +9,15 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class IHorseGame {
     public Map<String,Long> metadata; // [chat_id,lastdoing,stage,fps]
     public Map<String,Integer> coin;  //xmsoft -> $10
     public Map<String,Integer> horse_selected; // xmsoft -> 4;
-    public Map<String,Integer> progress; // 🐎 1 -> 15
+    public Map<Integer,Integer> progress; // 🐎 1 -> 15
     public Map<String,String> userinfo;
+    public Map<Integer,Integer> horse_status;
     public IHorseGame(Long game_id,Long chat_id,int message_id){
         metadata=new HashMap<>();
         metadata.put("game_id",game_id);
@@ -29,6 +31,7 @@ public class IHorseGame {
         horse_selected = new HashMap<>();
         progress = new HashMap<>();
         userinfo = new HashMap<>();
+        horse_status = new HashMap<>();
     }
     public IHorseGame addUserInfo(String username,String displayName){
         userinfo.put(username,(displayName.length()>10)?displayName.substring(0,16):displayName);
@@ -58,6 +61,10 @@ public class IHorseGame {
         }else{
             horse_selected.put(username,index);
         }
+        if(horse_selected.size()>=coin.size()){
+            startGame();
+            return this;
+        }
         updateStatus();
         return this;
     }
@@ -75,6 +82,9 @@ public class IHorseGame {
     private InlineKeyboardMarkup getStageMenu(){
         if(getStage()==1){
                 return HorseUtils.getHorseMarkUp(metadata.get("game_id"));
+        }
+        if(getStage()==2){
+                return HorseUtils.getItemMarkUp(metadata.get("game_id"));
         }
         return HorseUtils.getMenuMarkup(metadata.get("game_id"));
     }
@@ -94,6 +104,74 @@ public class IHorseGame {
                 menu+=String.format("%s : %s",userinfo.get(k),(num!=0)?"\uD83D\uDC34"+num:"\uD83D\uDD52未完成");
             }
         }
+
+        if(getStage()==2){
+            menu="\uD83C\uDFB2赛马 结算中\n\n";
+            for (int i:progress.keySet()){
+                String horse_status="\uD83C\uDFC7";
+                menu+=(HorseUtils.generateBlank(50-progress.get(i))+horse_status+i+HorseUtils.generateBlank(progress.get(i)))+"\n";
+            }
+            System.out.println(menu+"\n=======================");
+        }
+        if(getStage()==3){
+            menu="\uD83C\uDFB2赛马 结算结果\n\n";
+            for (int i:progress.keySet()){
+                String horse_status="\uD83C\uDFC7";
+                menu+=(HorseUtils.generateBlank(50-progress.get(i))+horse_status+i+HorseUtils.generateBlank(progress.get(i)))+"\n";
+            }
+        }
         return menu+"\n";
+    }
+
+    public void startGame() throws Exception {
+        for(int i=1;i<7;i++){
+            horse_status.put(i,0);
+        }
+
+        for(int i=1;i<7;i++){
+            progress.put(i,0);
+        }
+        setMetaData("stage",2L);
+        setMetaData("fps",0L);
+        updateStatus();
+
+
+        Thread thread = new Thread(metadata.get("game_id").toString()) {
+            public void run(){
+                try {
+                    Thread.sleep(1000);
+                    startGameEx();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+    }
+    public void startGameEx() throws Exception{
+        boolean goal=false;
+        Thread.sleep(1000);
+        Random random = new Random(metadata.get("game_id"));
+        while (true){
+            for(int i=1;i<7;i++){
+                if(horse_status.get(i)==0){
+                    int next = progress.get(i)+random.nextInt(5);
+                    if(next<50){
+                        progress.replace(i, next);
+                    }else{
+                        progress.replace(i,50);
+                        metadata.replace("stage",3L);
+                        goal=true;
+                        break;
+                    }
+                }
+            }
+            metadata.replace("fps",metadata.get("fps")+1);
+            updateStatus();
+            Thread.sleep(1000);
+            if(goal){
+                break;
+            }
+        }
     }
 }

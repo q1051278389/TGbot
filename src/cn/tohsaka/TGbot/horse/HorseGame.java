@@ -17,7 +17,7 @@ public class HorseGame {
     public static SendMessage GenerateMenu(){
         SendMessage sd = new SendMessage();
         sd.setReplyMarkup(HorseUtils.getMenuMarkup(generateUniversalId()));
-        sd.setText("欢迎来到赛马，请投注。\n游戏规则：赛道全长 40 米，每条马每秒前进 1-3 米，虫洞跃迁可额外前进 25 米，但是有 80% 的概率失踪，火箭加速可额外前进 16 米，但是有 50% 的概率死亡，快马加鞭可额外前进 4 米，但是有 33% 的概率摔下马，第五帧开始每帧有 10% 的概率重新上马，抢跑只可在第一帧开始前使用，但是有 10% 的概率被发现，停留 3 帧，所有操作下一帧有效。\n提示：本游戏仅供娱乐，不提供赌博服务，不可提现。");
+        sd.setText("欢迎来到赛马，请投注。\n游戏规则：赛道全长 50 米，每条马每秒前进 1-5 米，虫洞跃迁可额外前进 30 米，但是有 80% 的概率失踪，火箭加速可额外前进 16 米，但是有 50% 的概率死亡，快马加鞭可额外前进 4 米，但是有 33% 的概率摔下马，第五帧开始每帧有 10% 的概率重新上马，所有操作下一帧有效。\n提示：本游戏仅供娱乐，不提供赌博服务，不可提现。");
         return sd;
     }
     private static long generateUniversalId(){
@@ -61,8 +61,20 @@ public class HorseGame {
                 TGBot.bot.execute(new AnswerCallbackQuery().setCallbackQueryId(u.getCallbackQuery().getId()).setText("游戏已经开始").setShowAlert(true));
             }
         }
-
-
+        if(args[2].equalsIgnoreCase("select_horse")){
+            if(games.get(game_id).metadata.get("stage").intValue()==1){
+                games.get(game_id).setMetaData("lastdoing",new Date().getTime()).selectHorse(u.getCallbackQuery().getFrom().getUserName(), Integer.parseInt(args[3]));
+            }else{
+                TGBot.bot.execute(new AnswerCallbackQuery().setCallbackQueryId(u.getCallbackQuery().getId()).setText("游戏已经开始").setShowAlert(true));
+            }
+        }
+        if(args[2].equalsIgnoreCase("start_game")){ //stage 2
+            if((new Date().getTime()-games.get(game_id).metadata.get("lastdoing"))<10000){
+                TGBot.bot.execute(new AnswerCallbackQuery().setCallbackQueryId(u.getCallbackQuery().getId()).setText("10 秒内无人操作才可强制结算").setShowAlert(true));
+            }else{
+                games.get(game_id).startGame();
+            }
+        }
         TGBot.bot.execute(new AnswerCallbackQuery().setCallbackQueryId(u.getCallbackQuery().getId()));
         return null;
     }

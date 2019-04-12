@@ -50,4 +50,23 @@ public class HorseUtils {
         replyKeyboardMarkup.setKeyboard(commands);
         return replyKeyboardMarkup;
     }
+
+
+
+
+    public static String generateBlank(int n){
+        return String.format("%" + (n + 1) + "s"," ");
+    }
+
+    public static InlineKeyboardMarkup getItemMarkUp(Long game_id) {
+        InlineKeyboardMarkup replyKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> commands = new ArrayList<>();
+        List<InlineKeyboardButton> commandRow = new ArrayList<>();
+        commandRow.add(new InlineKeyboardButton().setText("\uD83C\uDF0C虫洞跃迁").setCallbackData(String.format("horse/%d/item/1",game_id)));
+        commandRow.add(new InlineKeyboardButton().setText("⬅️快马加鞭").setCallbackData(String.format("horse/%d/item/2",game_id)));
+        commandRow.add(new InlineKeyboardButton().setText("\uD83D\uDE80火箭加速").setCallbackData(String.format("horse/%d/item/3",game_id)));
+        commands.add(commandRow);
+        replyKeyboardMarkup.setKeyboard(commands);
+        return replyKeyboardMarkup;
+    }
 }
